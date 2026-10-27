@@ -4,6 +4,40 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Jai Kisan — Everything for Indian farmers, in one place</title>
+
+<!-- Single Viewport with notch support -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#ffffff">
+
+<!-- PWA Settings -->
+<link rel="manifest" href="/Former/manifest.json">
+<link rel="apple-touch-icon" href="/Former/android-chrome-192x192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+
+<!-- Fullscreen / safe-area CSS -->
+<style>
+  * {
+    box-sizing: border-box;
+  }
+  html, body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    min-height: 100dvh;
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+</style>
+
+<!-- Service Worker Registration -->
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/Former/sw.js');
+    });
+  }
+</script>
+  
 <meta name="description" content="Rent equipment, hire labour, book storage, check today's crop prices, government schemes, weather and seed authenticity — built for Indian farmers.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
