@@ -1,28 +1,28 @@
 {
-  "id": "/Former/",
+  "id": "/Farmer/",
   "name": "Farmer",
   "short_name": "Farmer",
-  "description": "Tasty and Comfort Former",
-  "start_url": "/Former/",
-  "scope": "/Former/",
+  "description": "Tasty and Comfort Farmer",
+  "start_url": "/Farmer/",
+  "scope": "/Farmer/",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#ffffff",
   "icons": [
     {
-      "src": "/Former/android-chrome-192x192.png",
+      "src": "/Farmer/android-chrome-192x192.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/Former/android-chrome-512x512.png",
+      "src": "/Farmer/android-chrome-512x512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/Former/android-chrome-512x512.png",
+      "src": "/Farmer/android-chrome-512x512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"
