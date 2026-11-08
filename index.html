@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>Jai Kisan — Telangana & AP Farm Rental & Mandi Portal</title>
+<title>Jai Kisan — Telangana & AP Farm Machinery & Mandi Portal</title>
 <meta name="theme-color" content="#1F6D45">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -66,7 +66,7 @@
   .nav-tab-btn.active { background: var(--ink); color: #FFF; }
   .cta-tab { background: var(--primary) !important; color: #FFF !important; }
 
-  /* TAB VIEW ENGINE (ENSURES NO LENGTHY VERTICAL SCROLLING) */
+  /* TAB VIEW ENGINE (PREVENTS LENGTHY SCROLLING) */
   .app-main { padding-top: 18px; }
   .app-view { display: none !important; }
   .app-view.active { display: block !important; animation: fadeIn 0.15s ease-out; }
@@ -85,14 +85,14 @@
   .sub-tab-btn.active { background: var(--primary); color: #FFF; border-color: var(--primary); }
 
   /* MARKETPLACE CONTROLS */
-  .market-controls { display: flex; gap: 10px; margin-bottom: 12px; }
+  .market-controls { display: flex; gap: 10px; margin-bottom: 14px; }
   .market-controls input, .market-controls select {
     padding: 9px 14px; border-radius: 999px; border: 1px solid var(--border);
     background: #FFF; font-size: 14px;
   }
   .market-controls input { flex: 1; }
 
-  /* LISTING CARDS & FIXED IMAGES */
+  /* LISTING CARDS & REAL VEHICLE PHOTOS */
   .listing-grid {
     display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
     gap: 16px;
@@ -102,14 +102,17 @@
     overflow: hidden; display: flex; flex-direction: column; box-shadow: var(--shadow);
   }
   .card-media {
-    position: relative; width: 100%; height: 180px; background: #E8ECE6; overflow: hidden;
+    position: relative; width: 100%; height: 185px; background: #222; overflow: hidden;
   }
   .card-media img {
     width: 100%; height: 100%; object-fit: cover; object-position: center; display: block;
+    transition: transform 0.25s ease;
   }
+  .listing-card:hover .card-media img { transform: scale(1.03); }
   .availability-tag {
     position: absolute; top: 10px; right: 10px; font-size: 11px; font-weight: 700;
     padding: 4px 10px; border-radius: 999px; background: #E4F3E9; color: #16512F;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
   }
   .card-body { padding: 14px; display: flex; flex-direction: column; gap: 6px; flex: 1; }
   .card-category { font-size: 11px; font-weight: 700; color: var(--primary); text-transform: uppercase; }
@@ -261,12 +264,12 @@
       <div class="sub-tabs">
         <button class="sub-tab-btn active" onclick="setSubCategory('equipment')">🚜 Tractors & Harvesters</button>
         <button class="sub-tab-btn" onclick="setSubCategory('labour')">👥 Labour Teams</button>
-        <button class="sub-tab-btn" onclick="setSubCategory('godown')">🏭 Cold Storage</button>
+        <button class="sub-tab-btn" onclick="setSubCategory('godown')">🏭 Cold Storage & Godown</button>
       </div>
     </div>
 
     <div class="market-controls">
-      <input type="search" id="searchInput" placeholder="Search tractor, harvester, Warangal, Khammam...">
+      <input type="search" id="searchInput" placeholder="Search John Deere, Mahindra, Kubota, Warangal...">
       <select id="sortSelect" onchange="renderMarketplace()">
         <option value="recent">Newest first</option>
         <option value="price-asc">Price: Low to High</option>
@@ -280,8 +283,8 @@
   <!-- ================= TAB 2: TELANGANA MANDI PRICES ================= -->
   <section class="app-view" id="view-mandi">
     <div class="view-header">
-      <h2>Telangana APMC Mandi Rates</h2>
-      <p>Verified daily market prices directly from Telangana market yards.</p>
+      <h2>Telangana & AP APMC Mandi Rates</h2>
+      <p>Verified daily market prices directly from Telangana and Andhra Pradesh market yards.</p>
     </div>
 
     <div class="mandi-box">
@@ -496,16 +499,20 @@
     caches.keys().then(names => names.forEach(name => caches.delete(name)));
   }
 
-  // 2. REAL VERIFIED VEHICLE IMAGES (Actual farm tractor, harvester, rotavator, godown)
-  const REAL_VEHICLE_IMAGES = {
-    tractor: 'Johndeere.jpg',
-    harvester: 'Preet 987 Rubber Track Combine Harvester.jpg',
-    rotavator: 'Shaktiman 7-Foot Heavy Rotavator.jpg',
-    labour: 'labour.jpg',
-    godown: 'Godown.jpg'
+  // 2. GENUINE PHOTOS OF ACTUAL TRACTORS, HARVESTERS, IMPLEMENTS & WAREHOUSES
+  const PHOTOS = {
+    johnDeere: 'https://upload.wikimedia.org/wikipedia/commons/e/e1/John_Deere_combine_and_tractor_at_work.jpg',
+    mahindraPlough: 'https://upload.wikimedia.org/wikipedia/commons/0/06/Field_ploughing_by_tractor.jpg',
+    harvester: 'https://upload.wikimedia.org/wikipedia/commons/e/eb/Combine_harvester_in_the_field_-_panoramio.jpg',
+    rotavator: 'https://upload.wikimedia.org/wikipedia/commons/b/b2/TractorWithMountedRototiller.JPG',
+    sprayDrone: 'https://upload.wikimedia.org/wikipedia/commons/c/c0/Drone_Agricole.jpg',
+    labourTransplant: 'https://upload.wikimedia.org/wikipedia/commons/7/71/Women_Harvesting_Rice_Paddy.jpg',
+    godownWarehouse: 'https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?auto=format&fit=crop&w=800&q=80'
   };
 
+  // 3. EXPANDED REALISTIC LISTINGS ACROSS TELANGANA & ANDHRA PRADESH
   let marketplaceData = [
+    // --- 🚜 VEHICLES & MACHINERY ---
     {
       id: "item-1",
       type: "equipment",
@@ -515,10 +522,10 @@
       village: "Narsampet",
       district: "Warangal",
       state: "Telangana",
-      desc: "Includes 9-tyne cultivator & 2-bottom MB plough. Driver included.",
+      desc: "Includes 9-tyne cultivator & 2-bottom MB plough. Driver included, diesel extra.",
       owner: "Ramesh Reddy",
       phone: "9848011223",
-      photo: REAL_VEHICLE_IMAGES.tractor
+      photo: PHOTOS.johnDeere
     },
     {
       id: "item-2",
@@ -532,10 +539,38 @@
       desc: "Rubber track paddy cutting machine. Works smoothly in wet mud fields.",
       owner: "K. Venkatesh",
       phone: "9440123456",
-      photo: REAL_VEHICLE_IMAGES.harvester
+      photo: PHOTOS.harvester
     },
     {
       id: "item-3",
+      type: "equipment",
+      title: "Mahindra 575 DI Sarpanch (45 HP Tractor)",
+      price: 1250,
+      unit: "day",
+      village: "Choutuppal",
+      district: "Suryapet",
+      state: "Telangana",
+      desc: "Equipped with dual-clutch tipping trailer and cage wheels for wet field puddling.",
+      owner: "M. Bhaskar Rao",
+      phone: "9849112244",
+      photo: PHOTOS.mahindraPlough
+    },
+    {
+      id: "item-4",
+      type: "equipment",
+      title: "Kubota DC-68G Paddy Combine Harvester",
+      price: 2600,
+      unit: "acre",
+      village: "Miryalaguda",
+      district: "Nalgonda",
+      state: "Telangana",
+      desc: "Lightweight rubber track harvester. Cuts, threshes and cleans grain on the spot.",
+      owner: "Ch. Anji Reddy",
+      phone: "9866123987",
+      photo: PHOTOS.harvester
+    },
+    {
+      id: "item-5",
       type: "equipment",
       title: "Shaktiman 7-Foot Heavy Rotavator",
       price: 850,
@@ -543,13 +578,101 @@
       village: "Peddapuram",
       district: "East Godavari",
       state: "Andhra Pradesh",
-      desc: "Boron steel blades, leaves ultra-fine tilth for wet or dry sowing.",
+      desc: "Boron steel L-blades, creates ultra-fine soil tilth for wet puddle and dry seeding.",
       owner: "Murali Manohar",
       phone: "9848099887",
-      photo: REAL_VEHICLE_IMAGES.rotavator
+      photo: PHOTOS.rotavator
     },
     {
-      id: "item-4",
+      id: "item-6",
+      type: "equipment",
+      title: "Swaraj 855 FE (52 HP Heavy Duty Tractor)",
+      price: 1500,
+      unit: "day",
+      village: "Armoor",
+      district: "Nizamabad",
+      state: "Telangana",
+      desc: "Heavy tractor paired with laser land leveler & 11-tyne cultivator for precise soil grading.",
+      owner: "P. Rajeshwar",
+      phone: "9440887766",
+      photo: PHOTOS.mahindraPlough
+    },
+    {
+      id: "item-7",
+      type: "equipment",
+      title: "Massey Ferguson 241 DI Maha Shakti (42 HP)",
+      price: 1200,
+      unit: "day",
+      village: "Tenali",
+      district: "Guntur",
+      state: "Andhra Pradesh",
+      desc: "Fuel efficient tractor. Includes disc plough and ridger for cotton/chilli bed ridges.",
+      owner: "K. Srinivasa Rao",
+      phone: "9848223344",
+      photo: PHOTOS.johnDeere
+    },
+    {
+      id: "item-8",
+      type: "equipment",
+      title: "Kisan 10-Litre Agriculture Spray Drone",
+      price: 450,
+      unit: "acre",
+      village: "Bapatla",
+      district: "Bapatla",
+      state: "Andhra Pradesh",
+      desc: "Automated GPS drone spraying. Covers 1 acre in 7 minutes. Certified pilot included.",
+      owner: "Naveen Kumar",
+      phone: "9700112233",
+      photo: PHOTOS.sprayDrone
+    },
+    {
+      id: "item-9",
+      type: "equipment",
+      title: "Borewell Drilling Rig & High-Pressure Compressor",
+      price: 110,
+      unit: "foot",
+      village: "Jadcherla",
+      district: "Mahabubnagar",
+      state: "Telangana",
+      desc: "6.5-inch DTH hammer rig for deep rocky soil drilling up to 800 feet.",
+      owner: "B. Narsimha Goud",
+      phone: "9440332211",
+      photo: PHOTOS.mahindraPlough
+    },
+
+    // --- 👥 LABOUR TEAMS ---
+    {
+      id: "item-10",
+      type: "labour",
+      title: "Paddy Transplanting & Weeding Gang (12 Workers)",
+      price: 450,
+      unit: "day/worker",
+      village: "Jangaon",
+      district: "Jangaon",
+      state: "Telangana",
+      desc: "Experienced women transplanting group. High planting density and quick field completion.",
+      owner: "Laxmi & Group",
+      phone: "9848123000",
+      photo: PHOTOS.labourTransplant
+    },
+    {
+      id: "item-11",
+      type: "labour",
+      title: "Chilli & Cotton Plucking Team (15 Workers)",
+      price: 400,
+      unit: "day/worker",
+      village: "Khammam Rural",
+      district: "Khammam",
+      state: "Telangana",
+      desc: "Fast harvesting team. Clean grade picking without leaf trash.",
+      owner: "G. Ramaiah",
+      phone: "9440998811",
+      photo: PHOTOS.labourTransplant
+    },
+
+    // --- 🏭 COLD STORAGE & GODOWN ---
+    {
+      id: "item-12",
       type: "godown",
       title: "Mirchi & Seed Cold Storage (1000 MT)",
       price: 90,
@@ -557,16 +680,30 @@
       village: "Miryalaguda",
       district: "Nalgonda",
       state: "Telangana",
-      desc: "Controlled atmosphere (0-4°C). WDRA accredited with pledge loans.",
+      desc: "Controlled atmosphere (0-4°C). WDRA accredited with pledge bank loan facility.",
       owner: "Srinivas Rao",
       phone: "9849055443",
-      photo: REAL_VEHICLE_IMAGES.godown
+      photo: PHOTOS.godownWarehouse
+    },
+    {
+      id: "item-13",
+      type: "godown",
+      title: "Dry Grain & Cotton Warehouse (5000 Sq Ft)",
+      price: 25,
+      unit: "sq ft/month",
+      village: "Enumamula",
+      district: "Warangal",
+      state: "Telangana",
+      desc: "Damp-proof concrete floor, 24x7 security, CC cameras, near Warangal market yard.",
+      owner: "K. Mohan Reddy",
+      phone: "9848077665",
+      photo: PHOTOS.godownWarehouse
     }
   ];
 
   let currentSub = 'equipment';
 
-  // 3. TAB CONTROLLER
+  // 4. TAB CONTROLLER
   function switchTab(viewId) {
     document.querySelectorAll('.app-view').forEach(v => {
       v.classList.remove('active');
@@ -610,7 +747,7 @@
     grid.innerHTML = items.map(item => `
       <div class="listing-card">
         <div class="card-media">
-          <img src="${item.photo}" alt="${item.title}">
+          <img src="${item.photo}" alt="${item.title}" onerror="this.src='${PHOTOS.johnDeere}';">
           <span class="availability-tag">Available</span>
         </div>
         <div class="card-body">
@@ -627,7 +764,7 @@
     `).join('');
   }
 
-  // 4. TELANGANA MANDI DATA ENGINE
+  // 5. TELANGANA MANDI DATA ENGINE
   const TELANGANA_MANDI = [
     { market: "Warangal (Enumamula)", district: "Warangal", crop: "Cotton (Kapas)", min: 7200, max: 7750, modal: 7520 },
     { market: "Khammam Mandi", district: "Khammam", crop: "Chilli Red (Teja)", min: 15000, max: 20200, modal: 18100 },
@@ -674,7 +811,7 @@
     loadMandi();
   }
 
-  // 5. WEATHER & CONTACT MODAL
+  // 6. WEATHER & CONTACT MODAL
   function getGPSWeather() {
     if (!navigator.geolocation) return alert("Geolocation not supported");
     const out = document.getElementById('weatherBox');
@@ -743,7 +880,7 @@
       desc: "Direct farmer machinery. Call for booking.",
       owner,
       phone,
-      photo: REAL_VEHICLE_IMAGES[type] || REAL_VEHICLE_IMAGES.tractor
+      photo: type === 'labour' ? PHOTOS.labourTransplant : type === 'godown' ? PHOTOS.godownWarehouse : PHOTOS.johnDeere
     });
 
     document.getElementById('postMsg').innerText = "✅ Listing published live!";
