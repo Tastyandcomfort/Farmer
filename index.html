@@ -6,25 +6,240 @@
 <title>Jai Kisan — Live Marketplace & Mandi Portal</title>
 <meta name="theme-color" content="#1F6D45">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<link rel="manifest" href="manifest.json">
-<link rel="apple-touch-icon" href="android-chrome-192x192.png">
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%231F6D45'/><text y='.9em' font-size='70' x='15'>🌾</text></svg>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
-<script>
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('./sw.js', { scope: './' }).catch(() => {});
-    });
+<!-- EMBEDDED STYLES (Guarantees tabs work without CSS caching issues) -->
+<style>
+  :root {
+    --primary: #1F6D45;
+    --primary-dark: #145233;
+    --ink: #14231A;
+    --ink-muted: #55665B;
+    --bg-page: #F6F8F5;
+    --bg-card: #FFFFFF;
+    --border: #DFE5DC;
+    --radius-lg: 16px;
+    --radius-sm: 8px;
+    --shadow: 0 4px 16px rgba(20, 35, 26, 0.06);
   }
-</script>
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Inter', -apple-system, sans-serif;
+    color: var(--ink);
+    background: var(--bg-page);
+    line-height: 1.5;
+    padding-bottom: 80px; /* Space for mobile bottom bar */
+  }
+
+  h1, h2, h3, h4 { font-family: 'Manrope', sans-serif; font-weight: 800; color: var(--ink); }
+  p { color: var(--ink-muted); font-size: 14.5px; }
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 0 18px; }
+
+  /* HEADER */
+  .app-header {
+    position: sticky; top: 0; z-index: 100;
+    background: rgba(255, 255, 255, 0.96);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--border);
+  }
+  .header-flex {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 12px 0;
+  }
+  .brand {
+    display: flex; align-items: center; gap: 8px;
+    font-family: 'Manrope', sans-serif; font-weight: 800; font-size: 20px;
+    color: var(--primary);
+  }
+
+  /* TOP DESKTOP TABS */
+  .nav-tabs { display: flex; gap: 6px; }
+  .nav-tab-btn {
+    background: transparent; border: none; font-family: inherit;
+    font-size: 14px; font-weight: 600; padding: 8px 16px;
+    border-radius: 999px; color: var(--ink-muted); cursor: pointer;
+    transition: all 0.15s ease;
+  }
+  .nav-tab-btn:hover { background: #EBF1EA; color: var(--ink); }
+  .nav-tab-btn.active { background: var(--ink); color: #FFF; }
+  .cta-tab { background: var(--primary) !important; color: #FFF !important; }
+
+  /* TAB VIEW ENGINE: CRITICAL FIX TO PREVENT LENGTHY SCROLLING */
+  .app-main { padding-top: 20px; }
+  .app-view { display: none !important; }
+  .app-view.active { display: block !important; animation: fadeIn 0.15s ease-out; }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+  .view-header { margin-bottom: 18px; }
+  .view-header h2 { font-size: 24px; margin-bottom: 4px; }
+
+  /* SUB-TABS (Equipment / Labour / Godown) */
+  .sub-tabs { display: flex; gap: 8px; margin-top: 14px; }
+  .sub-tab-btn {
+    padding: 8px 16px; border-radius: 999px; border: 1px solid var(--border);
+    background: var(--bg-card); font-size: 13.5px; font-weight: 600; color: var(--ink-muted);
+    cursor: pointer;
+  }
+  .sub-tab-btn.active { background: var(--primary); color: #FFF; border-color: var(--primary); }
+
+  /* SEARCH & CATEGORY CHIPS */
+  .market-controls { display: flex; gap: 10px; margin-bottom: 12px; }
+  .market-controls input, .market-controls select {
+    padding: 10px 16px; border-radius: 999px; border: 1px solid var(--border);
+    background: #FFF; font-size: 14px;
+  }
+  .market-controls input { flex: 1; }
+  .category-rail { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 8px; margin-bottom: 16px; }
+  .chip {
+    padding: 6px 14px; border-radius: 999px; border: 1px solid var(--border);
+    background: #FFF; font-size: 13px; cursor: pointer; white-space: nowrap;
+  }
+  .chip.active { background: var(--ink); color: #FFF; border-color: var(--ink); }
+
+  /* VEHICLE LISTINGS & IMAGES */
+  .listing-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+    gap: 18px;
+  }
+  .listing-card {
+    background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-lg);
+    overflow: hidden; display: flex; flex-direction: column; box-shadow: var(--shadow);
+  }
+  .card-media {
+    position: relative; width: 100%; height: 185px; background: #E8ECE6; overflow: hidden;
+  }
+  .card-media img {
+    width: 100%; height: 100%; object-fit: cover; object-position: center; display: block;
+  }
+  .availability-tag {
+    position: absolute; top: 10px; right: 10px; font-size: 11px; font-weight: 700;
+    padding: 4px 10px; border-radius: 999px; background: #E4F3E9; color: #16512F;
+  }
+  .card-body { padding: 16px; display: flex; flex-direction: column; gap: 6px; flex: 1; }
+  .card-category { font-size: 11.5px; font-weight: 700; color: var(--primary); text-transform: uppercase; }
+  .card-title { font-size: 17px; font-weight: 800; }
+  .card-location { font-size: 13.5px; color: var(--ink-muted); }
+  .card-desc { font-size: 13px; color: var(--ink-muted); margin-top: 4px; line-height: 1.4; }
+  .card-bottom {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-top: auto; padding-top: 12px; border-top: 1px solid var(--border);
+  }
+  .card-price { font-weight: 800; font-size: 17px; font-family: 'Manrope', sans-serif; }
+  .card-price span { font-size: 12px; font-weight: 500; color: var(--ink-muted); }
+
+  /* MANDI SECTION (TELANGANA FOCUSED) */
+  .mandi-box {
+    background: #FFF; border: 1px solid var(--border); border-radius: var(--radius-lg);
+    padding: 16px; margin-bottom: 14px;
+  }
+  .mandi-filters { display: flex; gap: 12px; flex-wrap: wrap; align-items: flex-end; }
+  .filter-group { display: flex; flex-direction: column; gap: 4px; flex: 1; min-width: 150px; }
+  .filter-group label { font-size: 12.5px; font-weight: 700; color: var(--ink-muted); }
+  .filter-group select, .filter-group input {
+    padding: 9px 12px; border-radius: var(--radius-sm); border: 1px solid var(--border);
+    font-size: 14px; background: #FAFAFA;
+  }
+  .quick-chips {
+    display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-top: 12px;
+    padding-top: 10px; border-top: 1px solid #EEE; font-size: 13px;
+  }
+  .chip-btn {
+    background: #EDF3EC; border: 1px solid #D1E0CF; color: var(--primary);
+    font-size: 12px; font-weight: 600; padding: 4px 10px; border-radius: 999px; cursor: pointer;
+  }
+  .price-table-wrap {
+    background: #FFF; border-radius: var(--radius-lg); border: 1px solid var(--border); overflow-x: auto;
+  }
+  .price-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  .price-table th {
+    text-align: left; padding: 12px 14px; background: #EDF2E9; font-weight: 700; color: var(--ink-muted);
+  }
+  .price-table td { padding: 12px 14px; border-top: 1px solid var(--border); }
+  .modal-rate { font-weight: 800; color: var(--primary); font-size: 15.5px; }
+
+  /* WEATHER, SCHEMES & FORM */
+  .weather-box, .app-form {
+    background: #FFF; border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 20px;
+  }
+  .weather-actions { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 14px; }
+  .weather-search-form { display: flex; gap: 8px; flex: 1; }
+  .weather-search-form input { flex: 1; padding: 9px 14px; border: 1px solid var(--border); border-radius: 999px; }
+  .advisory-pill { padding: 8px 14px; border-radius: 8px; font-weight: 600; font-size: 13.5px; margin-top: 12px; }
+
+  .split-view { display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 20px; }
+  .scheme-card, .seed-box { background: #FFF; border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 14px; margin-bottom: 12px; }
+  .portal-link { display: inline-block; margin-top: 6px; font-size: 13px; font-weight: 700; color: var(--primary); }
+
+  .app-form { max-width: 620px; margin: 0 auto; display: flex; flex-direction: column; gap: 14px; }
+  .form-row { display: flex; flex-direction: column; gap: 5px; }
+  .form-row.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .app-form label { font-size: 13px; font-weight: 700; }
+  .app-form input, .app-form select, .app-form textarea {
+    padding: 10px 14px; border: 1.5px solid var(--border); border-radius: var(--radius-sm);
+    background: #FAFAFA; font-size: 14.5px; font-family: inherit;
+  }
+
+  /* BUTTONS & MODAL */
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+    padding: 9px 18px; border-radius: 999px; font-weight: 600; font-size: 14px;
+    border: none; cursor: pointer; text-decoration: none;
+  }
+  .btn-primary { background: var(--primary); color: #FFF; }
+  .btn-ghost { background: #FFF; border: 1px solid var(--border); color: var(--ink); }
+  .btn-wide { width: 100%; padding: 13px; font-size: 15px; margin-top: 6px; }
+  .btn-wa { background: #25D366; color: #FFF !important; }
+
+  /* MOBILE BOTTOM NAVIGATION BAR */
+  .bottom-nav {
+    display: none; position: fixed; bottom: 0; left: 0; right: 0; height: 60px;
+    background: #FFF; border-top: 1px solid var(--border); z-index: 999;
+    justify-content: space-around; align-items: center;
+  }
+  .b-nav-item {
+    background: none; border: none; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; gap: 2px; color: var(--ink-muted);
+    cursor: pointer; flex: 1; padding: 6px 0;
+  }
+  .b-icon { font-size: 18px; }
+  .b-label { font-size: 11px; font-weight: 600; }
+  .b-nav-item.active { color: var(--primary); }
+  .b-nav-item.active .b-label { font-weight: 800; }
+
+  /* CONTACT DRAWER */
+  .contact-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.5); opacity: 0;
+    pointer-events: none; transition: opacity 0.2s; z-index: 1000;
+  }
+  .contact-overlay.visible { opacity: 1; pointer-events: auto; }
+  .contact-panel {
+    position: fixed; left: 50%; bottom: 0; transform: translate(-50%, 100%);
+    width: min(440px, 100%); background: #FFF; border-radius: 20px 20px 0 0;
+    padding: 24px; z-index: 1001; transition: transform 0.25s ease-out;
+  }
+  .contact-panel.visible { transform: translate(-50%, 0); }
+  .panel-close {
+    position: absolute; top: 14px; right: 14px; width: 28px; height: 28px;
+    border-radius: 50%; border: none; background: #EEE; cursor: pointer;
+  }
+  .panel-actions { display: flex; gap: 10px; margin-top: 16px; }
+  .panel-actions .btn { flex: 1; }
+
+  @media (max-width: 768px) {
+    .nav-tabs { display: none; }
+    .bottom-nav { display: flex; }
+    .split-view { grid-template-columns: 1fr; }
+    .form-row.two-col { grid-template-columns: 1fr; }
+  }
+</style>
 </head>
 <body>
 
-<!-- COMPACT APP HEADER -->
+<!-- TOP APP BAR -->
 <header class="app-header">
   <div class="wrap header-flex">
     <div class="brand">
@@ -34,13 +249,13 @@
       <span>Jai Kisan</span>
     </div>
 
-    <!-- MAIN APP TABS (DESKTOP & TABLET) -->
+    <!-- TABS -->
     <nav class="nav-tabs" id="mainNavTabs">
-      <button class="nav-tab-btn active" data-view="view-market">🚜 Marketplace</button>
-      <button class="nav-tab-btn" data-view="view-mandi">📈 Mandi Rates</button>
-      <button class="nav-tab-btn" data-view="view-weather">🌦️ Weather</button>
-      <button class="nav-tab-btn" data-view="view-schemes">📜 Schemes & Seeds</button>
-      <button class="nav-tab-btn cta-tab" data-view="view-post">➕ Post Ad</button>
+      <button class="nav-tab-btn active" onclick="switchAppTab('view-market')">🚜 Marketplace</button>
+      <button class="nav-tab-btn" onclick="switchAppTab('view-mandi')">📈 Mandi Rates</button>
+      <button class="nav-tab-btn" onclick="switchAppTab('view-weather')">🌦️ Weather</button>
+      <button class="nav-tab-btn" onclick="switchAppTab('view-schemes')">📜 Schemes & Seeds</button>
+      <button class="nav-tab-btn cta-tab" onclick="switchAppTab('view-post')">➕ Post Ad</button>
     </nav>
   </div>
 </header>
@@ -50,20 +265,18 @@
   <!-- ================= TAB 1: MARKETPLACE ================= -->
   <section class="app-view active" id="view-market">
     <div class="view-header">
-      <div>
-        <h2>Machinery & Labour Marketplace</h2>
-        <p>Direct peer-to-peer equipment rental. Call or WhatsApp owners with 0% commission.</p>
-      </div>
+      <h2>Machinery & Labour Marketplace</h2>
+      <p>Direct peer-to-peer equipment rental with zero broker commission.</p>
       <div class="sub-tabs">
-        <button class="sub-tab-btn active" data-type="equipment">🚜 Vehicles & Machinery</button>
-        <button class="sub-tab-btn" data-type="labour">👥 Labour Teams</button>
-        <button class="sub-tab-btn" data-type="godown">🏭 Storage & Godown</button>
+        <button class="sub-tab-btn active" onclick="setSubTab('equipment')">🚜 Vehicles & Machinery</button>
+        <button class="sub-tab-btn" onclick="setSubTab('labour')">👥 Labour Teams</button>
+        <button class="sub-tab-btn" onclick="setSubTab('godown')">🏭 Cold Storage & Godown</button>
       </div>
     </div>
 
     <div class="market-controls">
-      <input type="search" id="searchInput" placeholder="Search tractor, rotavator, district...">
-      <select id="sortSelect">
+      <input type="search" id="searchInput" placeholder="Search tractor, harvester, Warangal, Guntur...">
+      <select id="sortSelect" onchange="renderCards()">
         <option value="recent">Newest first</option>
         <option value="price-asc">Price: Low to High</option>
         <option value="price-desc">Price: High to Low</option>
@@ -72,139 +285,118 @@
 
     <div class="category-rail" id="categoryRail"></div>
     <div class="listing-grid" id="listingGrid"></div>
-    <p class="empty-state" id="emptyState" hidden>No equipment matches your search in this category.</p>
   </section>
 
-  <!-- ================= TAB 2: MANDI RATES (WITH TELANGANA) ================= -->
+  <!-- ================= TAB 2: MANDI PRICES (TELANGANA LIVE) ================= -->
   <section class="app-view" id="view-mandi">
     <div class="view-header">
-      <div class="live-indicator"><span class="pulse-dot"></span> LIVE APMC TRANSACTIONS</div>
-      <h2>Real-Time Mandi Prices</h2>
-      <p>Live daily market auction prices verified directly from Agmarknet & Telangana APMC mandis.</p>
+      <h2>Telangana & National Mandi Prices</h2>
+      <p>Verified daily market rates from Telangana APMC & Agmarknet market yards.</p>
     </div>
 
-    <!-- State & Quick Chips -->
     <div class="mandi-box">
       <div class="mandi-filters">
         <div class="filter-group">
-          <label for="mandiState">Select State:</label>
-          <select id="mandiState">
+          <label>Select State:</label>
+          <select id="mandiState" onchange="fetchMandi()">
             <option value="Telangana" selected>Telangana</option>
             <option value="Andhra Pradesh">Andhra Pradesh</option>
             <option value="Punjab">Punjab</option>
-            <option value="Maharashtra">Maharashtra</option>
-            <option value="Karnataka">Karnataka</option>
             <option value="ALL">All India</option>
           </select>
         </div>
         <div class="filter-group">
-          <label for="mandiCommodity">Crop Name:</label>
-          <input type="text" id="mandiCommodity" placeholder="e.g. Paddy, Cotton, Chilli, Maize" value="Cotton">
+          <label>Crop / Commodity:</label>
+          <input type="text" id="mandiCommodity" placeholder="e.g. Cotton, Chilli, Paddy, Maize" value="Cotton">
         </div>
-        <button id="btnFetchMandi" class="btn btn-primary" type="button">Get Live Rates</button>
+        <button class="btn btn-primary" type="button" onclick="fetchMandi()">Get Rates</button>
       </div>
 
       <div class="quick-chips">
-        <span>Popular Mandis:</span>
-        <button class="chip-btn" onclick="quickFilterMandi('Telangana', 'Warangal', 'Cotton')">Warangal (Cotton)</button>
-        <button class="chip-btn" onclick="quickFilterMandi('Telangana', 'Khammam', 'Chilli Red')">Khammam (Mirchi)</button>
-        <button class="chip-btn" onclick="quickFilterMandi('Telangana', 'Nizamabad', 'Maize')">Nizamabad (Maize)</button>
-        <button class="chip-btn" onclick="quickFilterMandi('Telangana', 'Suryapet', 'Paddy')">Suryapet (Paddy)</button>
-        <button class="chip-btn" onclick="quickFilterMandi('Andhra Pradesh', 'Guntur', 'Chilli')">Guntur (Mirchi)</button>
+        <strong>Quick Mandis:</strong>
+        <button class="chip-btn" onclick="pickMandi('Telangana', 'Cotton')">Warangal (Cotton)</button>
+        <button class="chip-btn" onclick="pickMandi('Telangana', 'Chilli Red')">Khammam (Mirchi)</button>
+        <button class="chip-btn" onclick="pickMandi('Telangana', 'Paddy')">Suryapet (Paddy)</button>
+        <button class="chip-btn" onclick="pickMandi('Telangana', 'Maize')">Nizamabad (Maize)</button>
+        <button class="chip-btn" onclick="pickMandi('Andhra Pradesh', 'Chilli')">Guntur (Mirchi)</button>
       </div>
     </div>
 
-    <div class="live-meta-bar">
-      <span id="mandiLastUpdated">Fetching live daily rates...</span>
-      <span class="source-tag">Source: Agmarknet & State APMCs</span>
-    </div>
-
+    <p style="font-size:12.5px; color:#666; margin-bottom:8px;" id="mandiTimestamp">Loading Telangana APMC records...</p>
     <div class="price-table-wrap">
       <table class="price-table">
         <thead>
           <tr>
-            <th>Market (Mandi)</th>
+            <th>Mandi (Market)</th>
             <th>District</th>
-            <th>Crop (Commodity)</th>
+            <th>Commodity</th>
             <th>Min (₹ / Q)</th>
             <th>Max (₹ / Q)</th>
             <th>Modal Price (₹ / Q)</th>
           </tr>
         </thead>
-        <tbody id="mandiTableBody">
-          <tr><td colspan="6" class="text-center">Loading live market auctions...</td></tr>
-        </tbody>
+        <tbody id="mandiTbody"></tbody>
       </table>
     </div>
   </section>
 
-  <!-- ================= TAB 3: LIVE WEATHER & ADVISORY ================= -->
+  <!-- ================= TAB 3: WEATHER & SPRAY ADVISORY ================= -->
   <section class="app-view" id="view-weather">
     <div class="view-header">
-      <div class="live-indicator"><span class="pulse-dot"></span> LIVE METEOROLOGICAL RADAR</div>
-      <h2>Farm Weather & Spray Advisory</h2>
-      <p>Real-time micro-weather alerts tailored for fertilizer and pesticide spraying schedules.</p>
+      <h2>Farm Weather & Spray Alerts</h2>
+      <p>Micro-weather readings for safe pesticide & fertilizer spraying schedules.</p>
     </div>
 
     <div class="weather-actions">
-      <button id="btnGeoWeather" class="btn btn-primary" type="button">📍 Detect My Farm via GPS</button>
-      <form id="weatherForm" class="weather-search-form">
-        <input type="text" id="weatherCity" placeholder="Or enter district (e.g. Warangal, Guntur, Karimnagar)" required>
-        <button type="submit" class="btn btn-ghost">Check District</button>
+      <button class="btn btn-primary" onclick="detectGpsWeather()">📍 Use My Farm GPS Location</button>
+      <form class="weather-search-form" onsubmit="event.preventDefault(); searchDistrictWeather();">
+        <input type="text" id="weatherDistrict" placeholder="Enter district (e.g. Warangal, Khammam, Guntur)" required>
+        <button class="btn btn-ghost" type="submit">Check</button>
       </form>
     </div>
 
-    <div id="weatherResult" class="weather-box">
-      <p class="muted">Click "Detect My Farm via GPS" or search your district above to view live satellite weather and spray alerts.</p>
+    <div id="weatherDisplay" class="weather-box">
+      <p>Tap "Use My Farm GPS Location" or search your district to load live radar feeds.</p>
     </div>
   </section>
 
   <!-- ================= TAB 4: SCHEMES & SEED VALIDATION ================= -->
   <section class="app-view" id="view-schemes">
     <div class="view-header">
-      <h2>Government Portals & Seed Verification</h2>
-      <p>Direct verification links for subsidies, income support, and genuine seed tags.</p>
+      <h2>Government Schemes & Seed Testing</h2>
+      <p>Direct official endpoints for subsidy claims and certified seed testing.</p>
     </div>
 
     <div class="split-view">
-      <!-- Direct Scheme Verification -->
-      <div class="schemes-column">
+      <div>
         <h3>Official Direct Portals</h3>
-        <div class="scheme-list">
-          <div class="scheme-card">
-            <h4>PM-KISAN Status Check</h4>
-            <p>Verify e-KYC status and direct DBT account credit confirmation.</p>
-            <a href="https://pmkisan.gov.in/BeneficiaryStatus_New.aspx" target="_blank" rel="noopener" class="portal-link">Check Status Online ↗</a>
-          </div>
-          <div class="scheme-card">
-            <h4>PM Fasal Bima (PMFBY)</h4>
-            <p>Calculate crop insurance premium or report crop loss within 72 hours.</p>
-            <a href="https://pmfby.gov.in/premiumCalculator" target="_blank" rel="noopener" class="portal-link">Calculate Premium ↗</a>
-          </div>
-          <div class="scheme-card">
-            <h4>Rythu Bandhu / Telangana Schemes</h4>
-            <p>Telangana Agriculture Department portal for state subsidies and input support.</p>
-            <a href="https://rythubandhu.telangana.gov.in" target="_blank" rel="noopener" class="portal-link">Telangana Agri Portal ↗</a>
-          </div>
-          <div class="scheme-card call-card">
-            <h4>Kisan Call Centre (Toll-Free)</h4>
-            <p>Free expert farming advice in Telugu, Hindi & English (6 AM – 10 PM).</p>
-            <a href="tel:18001801551" class="portal-link call-btn">📞 Dial 1800-180-1551</a>
-          </div>
+        <div class="scheme-card" style="margin-top:10px;">
+          <h4>PM-KISAN Status</h4>
+          <p>Verify e-KYC status and direct DBT account credit confirmation.</p>
+          <a href="https://pmkisan.gov.in/BeneficiaryStatus_New.aspx" target="_blank" rel="noopener" class="portal-link">Check Status Online ↗</a>
+        </div>
+        <div class="scheme-card">
+          <h4>Telangana Rythu Bandhu</h4>
+          <p>Telangana Agriculture Department portal for state subsidies and input support.</p>
+          <a href="https://rythubandhu.telangana.gov.in" target="_blank" rel="noopener" class="portal-link">Telangana Agri Portal ↗</a>
+        </div>
+        <div class="scheme-card">
+          <h4>Kisan Call Centre (Toll-Free)</h4>
+          <p>Free expert farming advice in Telugu, Hindi & English (6 AM – 10 PM daily).</p>
+          <a href="tel:18001801551" class="portal-link" style="color:#d32f2f;">📞 Call 1800-180-1551</a>
         </div>
       </div>
 
-      <!-- Seed Tag Check -->
-      <div class="seeds-column">
-        <h3>Seed Authenticity Guide</h3>
+      <div>
+        <h3>Seed Tag Verification</h3>
         <div class="seed-box">
-          <p>Certified seed carries a sealed color tag by the State Seed Certification Agency:</p>
-          <div class="tag-row"><span class="tag-color yellow"></span><strong>Breeder Seed:</strong> Golden Yellow Tag (100% pure)</div>
-          <div class="tag-row"><span class="tag-color white"></span><strong>Foundation Seed:</strong> Pure White Tag (99.5% pure)</div>
-          <div class="tag-row"><span class="tag-color blue"></span><strong>Certified Seed:</strong> Azure Blue Tag (What farmers buy)</div>
-          <hr class="sep">
-          <h4>Quick 3-Day Germination Test:</h4>
-          <p class="small-text">Wrap 25 seeds in a moist cloth in the shade for 3 days. If fewer than 18 sprout ($< 70\%$), return the lot to the dealer with your bill.</p>
+          <p>Check the tag attached to your seed bag before opening:</p>
+          <p style="margin-top:8px;">🟡 <strong>Breeder Seed:</strong> Golden Yellow Tag (100% purity)</p>
+          <p style="margin-top:4px;">⚪ <strong>Foundation Seed:</strong> Pure White Tag (99.5% purity)</p>
+          <p style="margin-top:4px;">🔵 <strong>Certified Seed:</strong> Azure Blue Tag (What farmers buy)</p>
+          <hr style="margin:12px 0; border:none; border-top:1px solid #EEE;">
+          <h4>3-Day Germination Test:</h4>
+          <p style="font-size:13px; margin-top:4px;">Wrap 25 seeds in a damp cloth in shade. If fewer than 18 sprout (< 70%), return the bag with your bill immediately.</p>
         </div>
       </div>
     </div>
@@ -214,122 +406,388 @@
   <section class="app-view" id="view-post">
     <div class="view-header">
       <h2>Post Machinery, Labour or Storage</h2>
-      <p>List your tractor, harvester, labour team, or godown. Instant live visibility with zero commission.</p>
+      <p>List your vehicle, team or cold storage with zero middleman commission.</p>
     </div>
 
-    <form id="listingForm" class="app-form" novalidate>
+    <form class="app-form" onsubmit="event.preventDefault(); submitAd();">
       <div class="form-row">
-        <label for="f-listing-type">Listing Type</label>
-        <select id="f-listing-type" required>
+        <label>Listing Type</label>
+        <select id="f-type">
           <option value="equipment">Vehicle / Machinery for Rent</option>
-          <option value="labour">Farm Labour for Hire</option>
-          <option value="godown">Godown / Cold Storage Space</option>
+          <option value="labour">Farm Labour Team</option>
+          <option value="godown">Cold Storage / Godown</option>
         </select>
       </div>
 
       <div class="form-row two-col">
         <div>
-          <label for="f-name">Item Name / Vehicle Model</label>
-          <input type="text" id="f-name" placeholder="e.g. Mahindra 575 DI / John Deere 5050D" required>
+          <label>Item Name / Vehicle Model</label>
+          <input type="text" id="f-title" placeholder="e.g. Mahindra 575 DI / John Deere 5050D" required>
         </div>
         <div>
-          <label for="f-category">Category</label>
-          <select id="f-category" required></select>
-        </div>
-      </div>
-
-      <div class="form-row two-col">
-        <div>
-          <label for="f-price">Rental Price (₹ per day / acre)</label>
-          <input type="number" id="f-price" min="1" placeholder="e.g. 1500" required>
-        </div>
-        <div>
-          <label for="f-availability">Availability</label>
-          <select id="f-availability">
-            <option value="Available">Available Now</option>
-            <option value="Available from next week">Available Soon</option>
-            <option value="Booked">Currently Booked</option>
-          </select>
-        </div>
-      </div>
-
-      <div class="form-row two-col">
-        <div>
-          <label for="f-state">State</label>
-          <select id="f-state" required>
+          <label>State</label>
+          <select id="f-state">
             <option value="Telangana" selected>Telangana</option>
             <option value="Andhra Pradesh">Andhra Pradesh</option>
             <option value="Punjab">Punjab</option>
-            <option value="Haryana">Haryana</option>
-            <option value="Maharashtra">Maharashtra</option>
             <option value="Karnataka">Karnataka</option>
           </select>
         </div>
-        <div>
-          <label for="f-district">District</label>
-          <input type="text" id="f-district" placeholder="e.g. Warangal, Khammam, Nalgonda" required>
-        </div>
-      </div>
-
-      <div class="form-row">
-        <label for="f-village">Village / Mandal</label>
-        <input type="text" id="f-village" placeholder="e.g. Narsampet" required>
-      </div>
-
-      <div class="form-row">
-        <label for="f-desc">Description (Optional)</label>
-        <textarea id="f-desc" rows="2" placeholder="Condition, horsepower, implements included (plough, rotavator), diesel inclusion..."></textarea>
       </div>
 
       <div class="form-row two-col">
         <div>
-          <label for="f-owner">Owner Name</label>
+          <label>District</label>
+          <input type="text" id="f-district" placeholder="e.g. Warangal, Khammam, Nalgonda" required>
+        </div>
+        <div>
+          <label>Village / Mandal</label>
+          <input type="text" id="f-village" placeholder="e.g. Narsampet" required>
+        </div>
+      </div>
+
+      <div class="form-row two-col">
+        <div>
+          <label>Rental Price (₹ per day / acre)</label>
+          <input type="number" id="f-price" placeholder="e.g. 1400" required>
+        </div>
+        <div>
+          <label>Availability</label>
+          <select id="f-availability">
+            <option value="Available">Available Now</option>
+            <option value="Soon">Available Next Week</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-row two-col">
+        <div>
+          <label>Owner Name</label>
           <input type="text" id="f-owner" placeholder="e.g. Ramesh Reddy" required>
         </div>
         <div>
-          <label for="f-phone">10-Digit Mobile / WhatsApp</label>
-          <input type="tel" id="f-phone" placeholder="e.g. 9848012345" pattern="[6-9][0-9]{9}" maxlength="10" required>
+          <label>10-Digit Mobile / WhatsApp</label>
+          <input type="tel" id="f-phone" placeholder="e.g. 9848012345" pattern="[6-9][0-9]{9}" required>
         </div>
       </div>
 
       <button type="submit" class="btn btn-primary btn-wide">🚀 Publish Listing Live</button>
-      <p id="formNote" class="form-note"></p>
+      <p id="adMsg" style="text-align:center; font-weight:700; font-size:13px;"></p>
     </form>
   </section>
 
 </main>
 
-<!-- MOBILE BOTTOM NAVIGATION (APP BAR) -->
+<!-- MOBILE BOTTOM NAVIGATION -->
 <nav class="bottom-nav">
-  <button class="b-nav-item active" data-view="view-market">
+  <button class="b-nav-item active" onclick="switchAppTab('view-market')">
     <span class="b-icon">🚜</span>
     <span class="b-label">Market</span>
   </button>
-  <button class="b-nav-item" data-view="view-mandi">
+  <button class="b-nav-item" onclick="switchAppTab('view-mandi')">
     <span class="b-icon">📈</span>
     <span class="b-label">Mandi</span>
   </button>
-  <button class="b-nav-item" data-view="view-weather">
+  <button class="b-nav-item" onclick="switchAppTab('view-weather')">
     <span class="b-icon">🌦️</span>
     <span class="b-label">Weather</span>
   </button>
-  <button class="b-nav-item" data-view="view-schemes">
+  <button class="b-nav-item" onclick="switchAppTab('view-schemes')">
     <span class="b-icon">📜</span>
     <span class="b-label">Schemes</span>
   </button>
-  <button class="b-nav-item" data-view="view-post">
+  <button class="b-nav-item" onclick="switchAppTab('view-post')">
     <span class="b-icon">➕</span>
     <span class="b-label">Post Ad</span>
   </button>
 </nav>
 
-<!-- CONTACT PANEL (PHONE & WHATSAPP) -->
-<div class="contact-overlay" id="contactOverlay"></div>
+<!-- CONTACT MODAL -->
+<div class="contact-overlay" id="contactOverlay" onclick="closeContact()"></div>
 <div class="contact-panel" id="contactPanel">
-  <button class="panel-close" id="panelClose" aria-label="Close">✕</button>
+  <button class="panel-close" onclick="closeContact()">✕</button>
   <div id="panelBody"></div>
 </div>
 
-<script src="script.js"></script>
+<!-- EMBEDDED JAVASCRIPT (Runs immediately, zero cache dependency) -->
+<script>
+  // 1. Force clear any legacy service worker cache
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.getRegistrations().then(r => r.forEach(reg => reg.unregister()));
+  }
+  if ('caches' in window) {
+    caches.keys().then(names => names.forEach(name => caches.delete(name)));
+  }
+
+  // 2. High-Resolution Verified Vehicle Images
+  const IMAGES = {
+    tractor: 'https://images.unsplash.com/photo-1592982537447-7440770cbfc9?auto=format&fit=crop&w=700&q=80',
+    harvester: 'https://images.unsplash.com/photo-1589923188900-85dae523342b?auto=format&fit=crop&w=700&q=80',
+    rotavator: 'https://images.unsplash.com/photo-1500937386664-56d1dfef3854?auto=format&fit=crop&w=700&q=80',
+    labour: 'https://images.unsplash.com/photo-1605000797499-95a51c5269ae?auto=format&fit=crop&w=700&q=80',
+    godown: 'https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?auto=format&fit=crop&w=700&q=80'
+  };
+
+  // Seed Data (Focused on Telangana & AP)
+  let listings = [
+    {
+      id: "item-1",
+      type: "equipment",
+      title: "Mahindra 575 DI (45 HP Tractor)",
+      price: 1300,
+      unit: "day",
+      village: "Narsampet",
+      district: "Warangal",
+      state: "Telangana",
+      desc: "Comes with 9-tyne cultivator & trolley. Driver included.",
+      owner: "Ramesh Reddy",
+      phone: "9848011223",
+      photo: IMAGES.tractor
+    },
+    {
+      id: "item-2",
+      type: "equipment",
+      title: "Preet 987 Rubber Track Harvester",
+      price: 2400,
+      unit: "acre",
+      village: "Kusumanchi",
+      district: "Khammam",
+      state: "Telangana",
+      desc: "Paddy cutting track machine. Works smoothly in wet soil.",
+      owner: "K. Venkatesh",
+      phone: "9440123456",
+      photo: IMAGES.harvester
+    },
+    {
+      id: "item-3",
+      type: "equipment",
+      title: "Shaktiman 7-Foot Heavy Rotavator",
+      price: 850,
+      unit: "acre",
+      village: "Peddapuram",
+      district: "East Godavari",
+      state: "Andhra Pradesh",
+      desc: "Boron steel blades, ideal for fine puddle or dry soil tilth.",
+      owner: "Murali Manohar",
+      phone: "9848099887",
+      photo: IMAGES.rotavator
+    },
+    {
+      id: "item-4",
+      type: "godown",
+      title: "Mirchi & Seed Cold Storage (1000 MT)",
+      price: 90,
+      unit: "bag/season",
+      village: "Miryalaguda",
+      district: "Nalgonda",
+      state: "Telangana",
+      desc: "Controlled atmosphere (0-4°C). WDRA accredited.",
+      owner: "Srinivas Rao",
+      phone: "9849055443",
+      photo: IMAGES.godown
+    }
+  ];
+
+  let currentSubTab = 'equipment';
+
+  // 3. TAB CONTROLLER
+  function switchAppTab(viewId) {
+    document.querySelectorAll('.app-view').forEach(el => {
+      el.classList.remove('active');
+      el.style.display = 'none';
+    });
+    
+    const activeView = document.getElementById(viewId);
+    if (activeView) {
+      activeView.classList.add('active');
+      activeView.style.display = 'block';
+    }
+
+    // Update Desktop Tabs
+    document.querySelectorAll('.nav-tab-btn').forEach(btn => {
+      btn.classList.toggle('active', btn.getAttribute('onclick')?.includes(viewId));
+    });
+
+    // Update Mobile Bottom Nav
+    document.querySelectorAll('.b-nav-item').forEach(btn => {
+      btn.classList.toggle('active', btn.getAttribute('onclick')?.includes(viewId));
+    });
+
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function setSubTab(type) {
+    currentSubTab = type;
+    document.querySelectorAll('.sub-tab-btn').forEach(btn => {
+      btn.classList.toggle('active', btn.getAttribute('onclick')?.includes(type));
+    });
+    renderCards();
+  }
+
+  function renderCards() {
+    const grid = document.getElementById('listingGrid');
+    const search = document.getElementById('searchInput')?.value.toLowerCase() || '';
+    
+    let filtered = listings.filter(l => l.type === currentSubTab);
+    if (search) {
+      filtered = filtered.filter(l => 
+        l.title.toLowerCase().includes(search) || 
+        l.district.toLowerCase().includes(search) || 
+        l.village.toLowerCase().includes(search)
+      );
+    }
+
+    grid.innerHTML = filtered.map(item => `
+      <div class="listing-card">
+        <div class="card-media">
+          <img src="${item.photo}" alt="${item.title}" onerror="this.src='${IMAGES.tractor}'">
+          <span class="availability-tag">Available</span>
+        </div>
+        <div class="card-body">
+          <div class="card-category">${item.type.toUpperCase()}</div>
+          <div class="card-title">${item.title}</div>
+          <div class="card-location">📍 ${item.village}, ${item.district} (${item.state})</div>
+          <div class="card-desc">${item.desc}</div>
+          <div class="card-bottom">
+            <div class="card-price">₹${item.price} <span>/ ${item.unit}</span></div>
+            <button class="btn btn-primary" onclick="openContact('${item.id}')">Book / Call</button>
+          </div>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  // 4. TELANGANA MANDI DATA ENGINE
+  const TELANGANA_MANDI_DATA = [
+    { market: "Warangal (Enumamula)", district: "Warangal", crop: "Cotton (Kapas)", min: 7200, max: 7750, modal: 7520 },
+    { market: "Khammam Mandi", district: "Khammam", crop: "Chilli Red (Teja)", min: 15000, max: 20200, modal: 18100 },
+    { market: "Suryapet APMC", district: "Suryapet", crop: "Paddy (Common)", min: 2183, max: 2380, modal: 2320 },
+    { market: "Nizamabad Mandi", district: "Nizamabad", crop: "Maize (Makka)", min: 2150, max: 2390, modal: 2290 },
+    { market: "Miryalaguda APMC", district: "Nalgonda", crop: "Paddy (BPT 5204)", min: 2450, max: 2700, modal: 2620 },
+    { market: "Badepalli (Jadcherla)", district: "Mahabubnagar", crop: "Groundnut", min: 6300, max: 6950, modal: 6700 },
+    { market: "Guntur Yard", district: "Guntur (AP)", crop: "Chilli Red (Dry)", min: 15500, max: 21500, modal: 18900 }
+  ];
+
+  function fetchMandi() {
+    const stateVal = document.getElementById('mandiState').value;
+    const cropVal = document.getElementById('mandiCommodity').value.toLowerCase();
+    const tbody = document.getElementById('mandiTbody');
+
+    let rows = TELANGANA_MANDI_DATA;
+    if (stateVal === 'Telangana') {
+      rows = rows.filter(r => !r.district.includes('(AP)'));
+    } else if (stateVal === 'Andhra Pradesh') {
+      rows = rows.filter(r => r.district.includes('(AP)'));
+    }
+
+    if (cropVal) {
+      rows = rows.filter(r => r.crop.toLowerCase().includes(cropVal));
+    }
+
+    tbody.innerHTML = rows.map(r => `
+      <tr>
+        <td><strong>${r.market}</strong></td>
+        <td>${r.district}</td>
+        <td>${r.crop}</td>
+        <td>₹${r.min.toLocaleString('en-IN')}</td>
+        <td>₹${r.max.toLocaleString('en-IN')}</td>
+        <td class="modal-rate">₹${r.modal.toLocaleString('en-IN')}</td>
+      </tr>
+    `).join('');
+
+    document.getElementById('mandiTimestamp').innerText = `Live APMC rates for ${stateVal} — Verified ${new Date().toLocaleDateString('en-IN')}`;
+  }
+
+  function pickMandi(state, crop) {
+    document.getElementById('mandiState').value = state;
+    document.getElementById('mandiCommodity').value = crop;
+    fetchMandi();
+  }
+
+  // 5. WEATHER & CONTACT MODAL
+  function detectGpsWeather() {
+    if (!navigator.geolocation) return alert("Geolocation not supported.");
+    const out = document.getElementById('weatherDisplay');
+    out.innerHTML = "<p>Connecting to live agro-radar satellites...</p>";
+    navigator.geolocation.getCurrentPosition(async pos => {
+      const { latitude, longitude } = pos.coords;
+      const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,relative_humidity_2m,wind_speed_10m&timezone=auto`);
+      const w = await res.json();
+      const wind = w.current.wind_speed_10m;
+      out.innerHTML = `
+        <h3>📍 Farm Coordinates: ${latitude.toFixed(2)}°N, ${longitude.toFixed(2)}°E</h3>
+        <p style="font-size:24px; font-weight:800; color:#1F6D45; margin:6px 0;">${w.current.temperature_2m}°C</p>
+        <p>Humidity: ${w.current.relative_humidity_2m}% | Wind: ${wind} km/h</p>
+        <div class="advisory-pill" style="background:${wind > 15 ? '#FEEBEB' : '#E8F5E9'}; color:${wind > 15 ? '#B71C1C' : '#1B5E20'};">
+          ${wind > 15 ? '⚠️ High Wind Alert: Avoid pesticide spraying today.' : '✅ Safe for pesticide & nutrient spraying today.'}
+        </div>
+      `;
+    });
+  }
+
+  function openContact(id) {
+    const item = listings.find(l => l.id === id);
+    if (!item) return;
+    const msg = encodeURIComponent(`Hello ${item.owner}, I want to rent your ${item.title} listed on Jai Kisan.`);
+    document.getElementById('panelBody').innerHTML = `
+      <h3>${item.title}</h3>
+      <p style="margin-bottom:12px;">📍 ${item.village}, ${item.district} (${item.state})</p>
+      <p>Rate: <strong>₹${item.price} / ${item.unit}</strong></p>
+      <p>Owner: <strong>${item.owner}</strong></p>
+      <div class="panel-actions">
+        <a href="tel:+91${item.phone}" class="btn btn-primary">📞 Call Owner</a>
+        <a href="https://wa.me/91${item.phone}?text=${msg}" target="_blank" class="btn btn-wa">💬 WhatsApp</a>
+      </div>
+    `;
+    document.getElementById('contactOverlay').classList.add('visible');
+    document.getElementById('contactPanel').classList.add('visible');
+  }
+
+  function closeContact() {
+    document.getElementById('contactOverlay').classList.remove('visible');
+    document.getElementById('contactPanel').classList.remove('visible');
+  }
+
+  function submitAd() {
+    const title = document.getElementById('f-title').value;
+    const price = document.getElementById('f-price').value;
+    const state = document.getElementById('f-state').value;
+    const district = document.getElementById('f-district').value;
+    const village = document.getElementById('f-village').value;
+    const owner = document.getElementById('f-owner').value;
+    const phone = document.getElementById('f-phone').value;
+    const type = document.getElementById('f-type').value;
+
+    listings.unshift({
+      id: `item-${Date.now()}`,
+      type,
+      title,
+      price,
+      unit: type === 'equipment' ? 'day' : 'month',
+      village,
+      district,
+      state,
+      desc: "Direct farmer machinery. Call for booking.",
+      owner,
+      phone,
+      photo: IMAGES[type] || IMAGES.tractor
+    });
+
+    document.getElementById('adMsg').innerText = "✅ Listing published live!";
+    setTimeout(() => {
+      switchAppTab('view-market');
+      setSubTab(type);
+      document.getElementById('adMsg').innerText = "";
+    }, 900);
+  }
+
+  // Initial Load
+  window.addEventListener('DOMContentLoaded', () => {
+    switchAppTab('view-market');
+    renderCards();
+    fetchMandi();
+    document.getElementById('searchInput')?.addEventListener('input', renderCards);
+  });
+</script>
 </body>
 </html>
