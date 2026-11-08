@@ -3,422 +3,332 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>Jai Kisan — Live Marketplace, Mandi Rates & Weather for Farmers</title>
-<meta name="description" content="100% real-time crop mandi prices, live agricultural weather alerts, and direct equipment rental marketplace for Indian farmers.">
-
-<!-- Mobile & PWA Configuration -->
+<title>Jai Kisan — Live Marketplace & Mandi Portal</title>
 <meta name="theme-color" content="#1F6D45">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="android-chrome-192x192.png">
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%231F6D45'/><text y='.9em' font-size='70' x='15'>🌾</text></svg>">
-
-<!-- Fonts -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;700;800&family=Inter:wght@400;500;600&family=Noto+Sans+Devanagari:wght@500;700&family=Noto+Sans+Telugu:wght@500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
 
-<!-- Service Worker Registration (Fixed relative path) -->
 <script>
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
-      navigator.serviceWorker.register('./sw.js', { scope: './' })
-        .then(() => console.log('ServiceWorker registered'))
-        .catch(err => console.log('ServiceWorker registration skipped:', err.message));
+      navigator.serviceWorker.register('./sw.js', { scope: './' }).catch(() => {});
     });
   }
 </script>
 </head>
 <body>
 
-<header class="site-header" id="top">
-  <div class="wrap header-inner">
-    <a class="logo" href="#top">
-      <svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+<!-- COMPACT APP HEADER -->
+<header class="app-header">
+  <div class="wrap header-flex">
+    <div class="brand">
+      <svg width="26" height="26" viewBox="0 0 28 28" fill="none">
         <path d="M4 20L10 8L14 16L18 6L24 20" stroke="#1F6D45" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
       </svg>
       <span>Jai Kisan</span>
-    </a>
-    <nav class="main-nav">
-      <a href="#marketplace" data-i18n="nav.marketplace">Marketplace</a>
-      <a href="#prices" data-i18n="nav.prices">Live Mandi Rates</a>
-      <a href="#weather" data-i18n="nav.weather">Live Weather</a>
-      <a href="#schemes" data-i18n="nav.schemes">Govt Schemes</a>
-      <a href="#seed-check" data-i18n="nav.seed">Seed Check</a>
-      <a href="#safety" data-i18n="nav.safety">Safety</a>
-    </nav>
-    <div class="header-actions">
-      <select id="langSwitch" class="lang-switch" aria-label="Language">
-        <option value="te">తెలుగు</option>
-        <option value="hi">हिंदी</option>
-        <option value="en" selected>English</option>
-      </select>
-      <a class="btn btn-primary btn-small" href="#list" data-i18n="nav.list">List / Offer</a>
     </div>
+
+    <!-- MAIN APP TABS (DESKTOP & TABLET) -->
+    <nav class="nav-tabs" id="mainNavTabs">
+      <button class="nav-tab-btn active" data-view="view-market">🚜 Marketplace</button>
+      <button class="nav-tab-btn" data-view="view-mandi">📈 Mandi Rates</button>
+      <button class="nav-tab-btn" data-view="view-weather">🌦️ Weather</button>
+      <button class="nav-tab-btn" data-view="view-schemes">📜 Schemes & Seeds</button>
+      <button class="nav-tab-btn cta-tab" data-view="view-post">➕ Post Ad</button>
+    </nav>
   </div>
 </header>
 
-<main>
+<main class="wrap app-main">
 
-  <!-- HERO -->
-  <section class="hero">
-    <div class="wrap hero-inner">
-      <div class="hero-copy">
-        <h1 data-i18n="hero.h1">Everything for the season, before you even leave the village.</h1>
-        <p class="hero-sub" data-i18n="hero.sub">Rent equipment, hire labour, or book godown space nearby — with 100% live mandi prices, real-time farm weather, and direct zero-commission contacts.</p>
-        <div class="hero-actions">
-          <a href="#marketplace" class="btn btn-primary" data-i18n="hero.cta1">Open marketplace</a>
-          <a href="#list" class="btn btn-ghost" data-i18n="hero.cta2">Offer equipment, labour or storage</a>
-        </div>
-        <div class="hero-stats">
-          <div class="stat"><strong id="statCount">0</strong><span data-i18n="hero.stat1">listings live</span></div>
-          <div class="stat"><strong id="statStates">0</strong><span data-i18n="hero.stat2">states covered</span></div>
-          <div class="stat"><strong>0%</strong><span data-i18n="hero.stat3">booking commission</span></div>
-        </div>
+  <!-- ================= TAB 1: MARKETPLACE ================= -->
+  <section class="app-view active" id="view-market">
+    <div class="view-header">
+      <div>
+        <h2>Machinery & Labour Marketplace</h2>
+        <p>Direct peer-to-peer equipment rental. Call or WhatsApp owners with 0% commission.</p>
       </div>
-      <div class="hero-art" aria-hidden="true">
-        <svg viewBox="0 0 520 420" fill="none" xmlns="http://www.w3.org/2000/svg" class="field-scene">
-          <path d="M0 340 Q130 320 260 340 T520 340V420H0V340Z" fill="#EDF2E9"/>
-          <ellipse cx="260" cy="382" rx="220" ry="14" fill="#14231A" opacity="0.07"/>
-          <circle cx="430" cy="70" r="34" fill="#E8A93A" opacity="0.9"/>
-          <path d="M90 320h140v-46h-32l-22-34h-46v34h-40z" fill="#1F6D45"/>
-          <path d="M90 320h70v-50h-12v50z" fill="#123D28" opacity="0.35"/>
-          <rect x="94" y="252" width="38" height="30" rx="3" fill="#3C4841"/>
-          <rect x="99" y="257" width="28" height="16" rx="2" fill="#FFF8EC" opacity="0.85"/>
-          <circle cx="132" cy="320" r="36" fill="#14231A"/><circle cx="132" cy="320" r="21" fill="#5B6B63"/><circle cx="132" cy="320" r="8" fill="#E8A93A"/>
-          <circle cx="234" cy="320" r="22" fill="#14231A"/><circle cx="234" cy="320" r="12" fill="#5B6B63"/><circle cx="234" cy="320" r="4" fill="#E8A93A"/>
-          <path d="M216 274h30l18 30h-48z" fill="#3E9A6C"/>
-          <path d="M86 316h-26" stroke="#E8A93A" stroke-width="4" stroke-linecap="round"/>
-        </svg>
+      <div class="sub-tabs">
+        <button class="sub-tab-btn active" data-type="equipment">🚜 Vehicles & Machinery</button>
+        <button class="sub-tab-btn" data-type="labour">👥 Labour Teams</button>
+        <button class="sub-tab-btn" data-type="godown">🏭 Storage & Godown</button>
       </div>
     </div>
+
+    <div class="market-controls">
+      <input type="search" id="searchInput" placeholder="Search tractor, rotavator, district...">
+      <select id="sortSelect">
+        <option value="recent">Newest first</option>
+        <option value="price-asc">Price: Low to High</option>
+        <option value="price-desc">Price: High to Low</option>
+      </select>
+    </div>
+
+    <div class="category-rail" id="categoryRail"></div>
+    <div class="listing-grid" id="listingGrid"></div>
+    <p class="empty-state" id="emptyState" hidden>No equipment matches your search in this category.</p>
   </section>
 
-  <!-- MARKETPLACE -->
-  <section class="browse-section" id="marketplace">
-    <div class="wrap">
-      <div class="section-head">
-        <h2 data-i18n="market.h2">Marketplace</h2>
-        <p data-i18n="market.sub">Equipment, farm labour, or godown space — browse what's nearby and call or WhatsApp directly.</p>
-      </div>
+  <!-- ================= TAB 2: MANDI RATES (WITH TELANGANA) ================= -->
+  <section class="app-view" id="view-mandi">
+    <div class="view-header">
+      <div class="live-indicator"><span class="pulse-dot"></span> LIVE APMC TRANSACTIONS</div>
+      <h2>Real-Time Mandi Prices</h2>
+      <p>Live daily market auction prices verified directly from Agmarknet & Telangana APMC mandis.</p>
+    </div>
 
-      <div class="tabs" role="tablist">
-        <button class="tab-btn active" data-panel="panel-equipment" data-i18n="tab.equipment">Equipment</button>
-        <button class="tab-btn" data-panel="panel-labour" data-i18n="tab.labour">Hire labour</button>
-        <button class="tab-btn" data-panel="panel-godown" data-i18n="tab.godown">Godown / storage</button>
-      </div>
-
-      <!-- EQUIPMENT PANEL -->
-      <div class="tab-panel active" id="panel-equipment">
-        <div class="controls">
-          <input type="search" id="searchInput" placeholder="Search equipment, district or state">
-          <select id="sortSelect">
-            <option value="recent">Newest first</option>
-            <option value="price-asc">Price: low to high</option>
-            <option value="price-desc">Price: high to low</option>
+    <!-- State & Quick Chips -->
+    <div class="mandi-box">
+      <div class="mandi-filters">
+        <div class="filter-group">
+          <label for="mandiState">Select State:</label>
+          <select id="mandiState">
+            <option value="Telangana" selected>Telangana</option>
+            <option value="Andhra Pradesh">Andhra Pradesh</option>
+            <option value="Punjab">Punjab</option>
+            <option value="Maharashtra">Maharashtra</option>
+            <option value="Karnataka">Karnataka</option>
+            <option value="ALL">All India</option>
           </select>
         </div>
-        <div class="category-rail" id="categoryRail"></div>
-        <div class="listing-grid" id="listingGrid"></div>
-        <p class="empty-state" id="emptyState" hidden>No equipment matches that search. Try a different district or category.</p>
+        <div class="filter-group">
+          <label for="mandiCommodity">Crop Name:</label>
+          <input type="text" id="mandiCommodity" placeholder="e.g. Paddy, Cotton, Chilli, Maize" value="Cotton">
+        </div>
+        <button id="btnFetchMandi" class="btn btn-primary" type="button">Get Live Rates</button>
       </div>
 
-      <!-- LABOUR PANEL -->
-      <div class="tab-panel" id="panel-labour">
-        <div class="controls">
-          <input type="search" id="labourSearch" placeholder="Search skill, district or state">
-          <select id="labourSort">
-            <option value="recent">Newest first</option>
-            <option value="price-asc">Wage: low to high</option>
-            <option value="price-desc">Wage: high to low</option>
-          </select>
-        </div>
-        <div class="category-rail" id="labourRail"></div>
-        <div class="listing-grid" id="labourGrid"></div>
-        <p class="empty-state" id="labourEmpty" hidden>No labour teams match that search yet.</p>
+      <div class="quick-chips">
+        <span>Popular Mandis:</span>
+        <button class="chip-btn" onclick="quickFilterMandi('Telangana', 'Warangal', 'Cotton')">Warangal (Cotton)</button>
+        <button class="chip-btn" onclick="quickFilterMandi('Telangana', 'Khammam', 'Chilli Red')">Khammam (Mirchi)</button>
+        <button class="chip-btn" onclick="quickFilterMandi('Telangana', 'Nizamabad', 'Maize')">Nizamabad (Maize)</button>
+        <button class="chip-btn" onclick="quickFilterMandi('Telangana', 'Suryapet', 'Paddy')">Suryapet (Paddy)</button>
+        <button class="chip-btn" onclick="quickFilterMandi('Andhra Pradesh', 'Guntur', 'Chilli')">Guntur (Mirchi)</button>
       </div>
+    </div>
 
-      <!-- GODOWN PANEL -->
-      <div class="tab-panel" id="panel-godown">
-        <div class="controls">
-          <input type="search" id="godownSearch" placeholder="Search storage type, district or state">
-          <select id="godownSort">
-            <option value="recent">Newest first</option>
-            <option value="price-asc">Rent: low to high</option>
-            <option value="price-desc">Rent: high to low</option>
-          </select>
-        </div>
-        <div class="category-rail" id="godownRail"></div>
-        <div class="listing-grid" id="godownGrid"></div>
-        <p class="empty-state" id="godownEmpty" hidden>No storage listings match that search yet.</p>
-      </div>
+    <div class="live-meta-bar">
+      <span id="mandiLastUpdated">Fetching live daily rates...</span>
+      <span class="source-tag">Source: Agmarknet & State APMCs</span>
+    </div>
+
+    <div class="price-table-wrap">
+      <table class="price-table">
+        <thead>
+          <tr>
+            <th>Market (Mandi)</th>
+            <th>District</th>
+            <th>Crop (Commodity)</th>
+            <th>Min (₹ / Q)</th>
+            <th>Max (₹ / Q)</th>
+            <th>Modal Price (₹ / Q)</th>
+          </tr>
+        </thead>
+        <tbody id="mandiTableBody">
+          <tr><td colspan="6" class="text-center">Loading live market auctions...</td></tr>
+        </tbody>
+      </table>
     </div>
   </section>
 
-  <!-- LIVE MANDI PRICES (100% LIVE REAL-TIME DATA) -->
-  <section class="prices-section" id="prices">
-    <div class="wrap">
-      <div class="section-head">
-        <div class="live-indicator"><span class="pulse-dot"></span> LIVE APMC MANDI FEED</div>
-        <h2 data-i18n="prices.h2">Real-Time Mandi Prices</h2>
-        <p>Live daily commodity arrivals and auction rates verified from the Government of India National Agriculture Market (Agmarknet).</p>
-      </div>
-      
-      <div class="mandi-filter-bar">
-        <input type="text" id="mandiState" placeholder="State (e.g. Andhra Pradesh, Punjab, Gujarat)" value="Andhra Pradesh">
-        <input type="text" id="mandiCommodity" placeholder="Crop (e.g. Paddy, Cotton, Wheat, Onion)" value="Paddy(Dhan)(Common)">
-        <button id="btnFetchMandi" class="btn btn-primary" type="button">Fetch Live Rates</button>
-      </div>
+  <!-- ================= TAB 3: LIVE WEATHER & ADVISORY ================= -->
+  <section class="app-view" id="view-weather">
+    <div class="view-header">
+      <div class="live-indicator"><span class="pulse-dot"></span> LIVE METEOROLOGICAL RADAR</div>
+      <h2>Farm Weather & Spray Advisory</h2>
+      <p>Real-time micro-weather alerts tailored for fertilizer and pesticide spraying schedules.</p>
+    </div>
 
-      <div class="live-meta-bar">
-        <span id="mandiLastUpdated">Fetching live daily feed...</span>
-        <a href="https://agmarknet.gov.in" target="_blank" rel="noopener" class="source-link">Official Agmarknet Portal ↗</a>
-      </div>
+    <div class="weather-actions">
+      <button id="btnGeoWeather" class="btn btn-primary" type="button">📍 Detect My Farm via GPS</button>
+      <form id="weatherForm" class="weather-search-form">
+        <input type="text" id="weatherCity" placeholder="Or enter district (e.g. Warangal, Guntur, Karimnagar)" required>
+        <button type="submit" class="btn btn-ghost">Check District</button>
+      </form>
+    </div>
 
-      <div class="price-table-wrap">
-        <table class="price-table" id="liveMandiTable">
-          <thead>
-            <tr>
-              <th>Mandi (Market)</th>
-              <th>District</th>
-              <th>Commodity</th>
-              <th>Min (₹ / Q)</th>
-              <th>Max (₹ / Q)</th>
-              <th>Modal Price (₹ / Q)</th>
-            </tr>
-          </thead>
-          <tbody id="mandiTableBody">
-            <tr><td colspan="6" class="text-center">Click "Fetch Live Rates" or allow location to load live prices.</td></tr>
-          </tbody>
-        </table>
-      </div>
+    <div id="weatherResult" class="weather-box">
+      <p class="muted">Click "Detect My Farm via GPS" or search your district above to view live satellite weather and spray alerts.</p>
     </div>
   </section>
 
-  <!-- LIVE FARM WEATHER (100% REAL-TIME) -->
-  <section class="weather-section" id="weather">
-    <div class="wrap">
-      <div class="section-head">
-        <div class="live-indicator"><span class="pulse-dot"></span> REAL-TIME RADAR & SATELLITE</div>
-        <h2 data-i18n="weather.h2">Micro-Weather & Spray Advisories</h2>
-        <p>Hourly conditions and 7-day agricultural forecasts calculated directly for your farm coordinates.</p>
-      </div>
-      
-      <div class="weather-bar">
-        <button id="btnGeoWeather" class="btn btn-primary" type="button">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M2 12h20"/><circle cx="12" cy="12" r="7"/></svg>
-          Use My GPS Location
-        </button>
-        <form class="weather-form" id="weatherForm">
-          <input type="text" id="weatherCity" placeholder="Or enter district name (e.g. Guntur, Ludhiana)" required>
-          <button type="submit" class="btn btn-ghost">Check Area</button>
-        </form>
-      </div>
-
-      <div id="weatherResult" class="weather-result"></div>
-      <p class="source-note">Real-time agro-meteorological data provided via WMO Global High-Resolution Radar & Satellite feeds.</p>
+  <!-- ================= TAB 4: SCHEMES & SEED VALIDATION ================= -->
+  <section class="app-view" id="view-schemes">
+    <div class="view-header">
+      <h2>Government Portals & Seed Verification</h2>
+      <p>Direct verification links for subsidies, income support, and genuine seed tags.</p>
     </div>
-  </section>
 
-  <!-- GOVT SCHEMES (LIVE PORTALS & DIRECT BENEFIT VERIFICATION) -->
-  <section class="schemes-section" id="schemes">
-    <div class="wrap">
-      <div class="section-head">
-        <h2>Government Verification Portals & Subsidies</h2>
-        <p>Direct official endpoints for beneficiary verification, e-KYC status, and subsidy claims.</p>
+    <div class="split-view">
+      <!-- Direct Scheme Verification -->
+      <div class="schemes-column">
+        <h3>Official Direct Portals</h3>
+        <div class="scheme-list">
+          <div class="scheme-card">
+            <h4>PM-KISAN Status Check</h4>
+            <p>Verify e-KYC status and direct DBT account credit confirmation.</p>
+            <a href="https://pmkisan.gov.in/BeneficiaryStatus_New.aspx" target="_blank" rel="noopener" class="portal-link">Check Status Online ↗</a>
+          </div>
+          <div class="scheme-card">
+            <h4>PM Fasal Bima (PMFBY)</h4>
+            <p>Calculate crop insurance premium or report crop loss within 72 hours.</p>
+            <a href="https://pmfby.gov.in/premiumCalculator" target="_blank" rel="noopener" class="portal-link">Calculate Premium ↗</a>
+          </div>
+          <div class="scheme-card">
+            <h4>Rythu Bandhu / Telangana Schemes</h4>
+            <p>Telangana Agriculture Department portal for state subsidies and input support.</p>
+            <a href="https://rythubandhu.telangana.gov.in" target="_blank" rel="noopener" class="portal-link">Telangana Agri Portal ↗</a>
+          </div>
+          <div class="scheme-card call-card">
+            <h4>Kisan Call Centre (Toll-Free)</h4>
+            <p>Free expert farming advice in Telugu, Hindi & English (6 AM – 10 PM).</p>
+            <a href="tel:18001801551" class="portal-link call-btn">📞 Dial 1800-180-1551</a>
+          </div>
+        </div>
       </div>
-      <div class="scheme-grid">
-        <div class="scheme-card">
-          <div class="scheme-badge">Direct Benefit Transfer</div>
-          <h3>PM-KISAN</h3>
-          <p>₹6,000/year direct bank transfer. Check your installment status, DBT transfer date, or complete mandatory Aadhaar e-KYC.</p>
-          <a href="https://pmkisan.gov.in/BeneficiaryStatus_New.aspx" target="_blank" rel="noopener" class="portal-btn">Verify Beneficiary Status ↗</a>
-        </div>
-        <div class="scheme-card">
-          <div class="scheme-badge">Crop Insurance</div>
-          <h3>PM Fasal Bima (PMFBY)</h3>
-          <p>Government-backed crop insurance. Calculate live insurance premiums for your crop and district or report loss within 72 hours.</p>
-          <a href="https://pmfby.gov.in/premiumCalculator" target="_blank" rel="noopener" class="portal-btn">Calculate Live Premium ↗</a>
-        </div>
-        <div class="scheme-card">
-          <div class="scheme-badge">Soil Health</div>
-          <h3>Soil Health Card</h3>
-          <p>Track test results of soil samples collected from your survey number and download official crop-wise fertilizer recommendations.</p>
-          <a href="https://soilhealth.dac.gov.in" target="_blank" rel="noopener" class="portal-btn">Download Soil Card ↗</a>
-        </div>
-        <div class="scheme-card">
-          <div class="scheme-badge">Machinery Subsidy</div>
-          <h3>SMAM & Kisan Drones</h3>
-          <p>40% to 50% central subsidy for individual farmers purchasing tractors, rotavators, and sprayers, plus 80% subsidy for SHG drone hiring.</p>
-          <a href="https://agrimachinery.nic.in" target="_blank" rel="noopener" class="portal-btn">Apply Machinery Subsidy ↗</a>
-        </div>
-        <div class="scheme-card">
-          <div class="scheme-badge">Solar Energy</div>
-          <h3>PM-KUSUM (Solar Pumps)</h3>
-          <p>Up to 60% subsidy for replacing diesel pumps with standalone solar agriculture pumps. Save fuel costs and sell surplus grid power.</p>
-          <a href="https://pmkusum.mnre.gov.in" target="_blank" rel="noopener" class="portal-btn">Apply Solar Subsidy ↗</a>
-        </div>
-        <div class="scheme-card">
-          <div class="scheme-badge">Toll-Free 24x7</div>
-          <h3>Kisan Call Centre</h3>
-          <p>Direct telephone consultation with state agriculture university agronomists in your native language (6 AM – 10 PM daily).</p>
-          <a href="tel:18001801551" class="portal-btn call-action">📞 Call 1800-180-1551</a>
+
+      <!-- Seed Tag Check -->
+      <div class="seeds-column">
+        <h3>Seed Authenticity Guide</h3>
+        <div class="seed-box">
+          <p>Certified seed carries a sealed color tag by the State Seed Certification Agency:</p>
+          <div class="tag-row"><span class="tag-color yellow"></span><strong>Breeder Seed:</strong> Golden Yellow Tag (100% pure)</div>
+          <div class="tag-row"><span class="tag-color white"></span><strong>Foundation Seed:</strong> Pure White Tag (99.5% pure)</div>
+          <div class="tag-row"><span class="tag-color blue"></span><strong>Certified Seed:</strong> Azure Blue Tag (What farmers buy)</div>
+          <hr class="sep">
+          <h4>Quick 3-Day Germination Test:</h4>
+          <p class="small-text">Wrap 25 seeds in a moist cloth in the shade for 3 days. If fewer than 18 sprout ($< 70\%$), return the lot to the dealer with your bill.</p>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- SEED CHECK -->
-  <section class="seed-section" id="seed-check">
-    <div class="wrap seed-inner">
-      <div class="section-head">
-        <h2>Is your seed genuine?</h2>
-        <p>Certified seed sold to farmers carries a tamper-evident color tag prescribed under the Indian Seeds Act.</p>
-      </div>
-      <div class="tag-legend">
-        <div class="tag-chip" style="--tag-color:#E8A93A;">Breeder seed — golden yellow tag (research institutes only)</div>
-        <div class="tag-chip" style="--tag-color:#FFFFFF;">Foundation seed — white tag (99.5% purity)</div>
-        <div class="tag-chip" style="--tag-color:#7A5FA6;">Registered seed — purple tag</div>
-        <div class="tag-chip" style="--tag-color:#2E6DA4;">Certified seed — azure blue tag (sold to farmers)</div>
-      </div>
-      <ul class="checklist">
-        <li><strong>Buy only with a printed GST invoice:</strong> Ensure batch number and seed variety are clearly written on your bill.</li>
-        <li><strong>Examine the Blue Tag:</strong> Look for the State Seed Certification Agency (SSCA) seal and lot number.</li>
-        <li><strong>Run a quick 3-day test:</strong> Wrap 25 seeds in a wet cloth in the shade. If fewer than 18 sprout ($< 70\%$), return the lot immediately with the bill.</li>
-        <li><strong>Report Fake Seeds:</strong> Call the national helpline <a href="tel:18001801551">1800-180-1551</a> or notify your District Agricultural Officer (DAO).</li>
-      </ul>
+  <!-- ================= TAB 5: POST AN AD ================= -->
+  <section class="app-view" id="view-post">
+    <div class="view-header">
+      <h2>Post Machinery, Labour or Storage</h2>
+      <p>List your tractor, harvester, labour team, or godown. Instant live visibility with zero commission.</p>
     </div>
-  </section>
 
-  <!-- LIST YOUR LISTING -->
-  <section class="list-section" id="list">
-    <div class="wrap list-inner">
-      <div class="section-head">
-        <h2>Offer equipment, labour or storage</h2>
-        <p>Post your machine, labour team, or godown — instantly visible across your district with zero commission.</p>
+    <form id="listingForm" class="app-form" novalidate>
+      <div class="form-row">
+        <label for="f-listing-type">Listing Type</label>
+        <select id="f-listing-type" required>
+          <option value="equipment">Vehicle / Machinery for Rent</option>
+          <option value="labour">Farm Labour for Hire</option>
+          <option value="godown">Godown / Cold Storage Space</option>
+        </select>
       </div>
 
-      <form id="listingForm" class="listing-form" novalidate>
-        <div class="form-row">
-          <label for="f-listing-type">What are you listing?</label>
-          <select id="f-listing-type" required>
-            <option value="equipment">Equipment for rent</option>
-            <option value="labour">Labour for hire</option>
-            <option value="godown">Godown / storage space</option>
-          </select>
+      <div class="form-row two-col">
+        <div>
+          <label for="f-name">Item Name / Vehicle Model</label>
+          <input type="text" id="f-name" placeholder="e.g. Mahindra 575 DI / John Deere 5050D" required>
         </div>
-
-        <div class="form-row">
-          <label for="f-name" id="name-label">Equipment name / Model</label>
-          <input type="text" id="f-name" placeholder="e.g. John Deere 5050D Tractor" required>
-        </div>
-
-        <div class="form-row">
+        <div>
           <label for="f-category">Category</label>
           <select id="f-category" required></select>
         </div>
+      </div>
 
-        <div class="form-row two-col">
-          <div>
-            <label for="f-price" id="price-label">Rental price (₹ per day / acre)</label>
-            <input type="number" id="f-price" min="1" placeholder="e.g. 1500" required>
-          </div>
-          <div id="availability-group">
-            <label for="f-availability">Availability</label>
-            <select id="f-availability">
-              <option value="Available">Available now</option>
-              <option value="Available from next week">Available from next week</option>
-              <option value="Booked">Currently booked</option>
-            </select>
-          </div>
-          <div id="workers-group" hidden>
-            <label for="f-workers">Number of workers</label>
-            <input type="number" id="f-workers" min="1" placeholder="e.g. 8">
-          </div>
-          <div id="capacity-group" hidden>
-            <label for="f-capacity">Capacity</label>
-            <input type="text" id="f-capacity" placeholder="e.g. 2,000 sq ft / 200 MT">
-          </div>
+      <div class="form-row two-col">
+        <div>
+          <label for="f-price">Rental Price (₹ per day / acre)</label>
+          <input type="number" id="f-price" min="1" placeholder="e.g. 1500" required>
         </div>
-
-        <div class="form-row two-col">
-          <div>
-            <label for="f-village">Village / Mandal</label>
-            <input type="text" id="f-village" placeholder="e.g. Peddapuram" required>
-          </div>
-          <div>
-            <label for="f-district">District</label>
-            <input type="text" id="f-district" placeholder="e.g. East Godavari" required>
-          </div>
-        </div>
-
-        <div class="form-row">
-          <label for="f-state">State</label>
-          <select id="f-state" required>
-            <option value="" disabled selected>Select a state</option>
+        <div>
+          <label for="f-availability">Availability</label>
+          <select id="f-availability">
+            <option value="Available">Available Now</option>
+            <option value="Available from next week">Available Soon</option>
+            <option value="Booked">Currently Booked</option>
           </select>
         </div>
+      </div>
 
-        <div class="form-row">
-          <label for="f-desc">Description (optional)</label>
-          <textarea id="f-desc" rows="3" placeholder="Condition, horsepower, diesel inclusion, attachments available..."></textarea>
+      <div class="form-row two-col">
+        <div>
+          <label for="f-state">State</label>
+          <select id="f-state" required>
+            <option value="Telangana" selected>Telangana</option>
+            <option value="Andhra Pradesh">Andhra Pradesh</option>
+            <option value="Punjab">Punjab</option>
+            <option value="Haryana">Haryana</option>
+            <option value="Maharashtra">Maharashtra</option>
+            <option value="Karnataka">Karnataka</option>
+          </select>
         </div>
-
-        <div class="form-row">
-          <label for="f-photo">Photo (optional)</label>
-          <input type="file" id="f-photo" accept="image/*">
-          <div id="photoPreview" class="photo-preview"></div>
+        <div>
+          <label for="f-district">District</label>
+          <input type="text" id="f-district" placeholder="e.g. Warangal, Khammam, Nalgonda" required>
         </div>
+      </div>
 
-        <div class="form-row two-col">
-          <div>
-            <label for="f-owner">Your name</label>
-            <input type="text" id="f-owner" placeholder="e.g. Murali Manohar" required>
-          </div>
-          <div>
-            <label for="f-phone">10-Digit Mobile / WhatsApp Number</label>
-            <input type="tel" id="f-phone" placeholder="e.g. 9848012345" required pattern="[6-9][0-9]{9}" maxlength="10">
-          </div>
+      <div class="form-row">
+        <label for="f-village">Village / Mandal</label>
+        <input type="text" id="f-village" placeholder="e.g. Narsampet" required>
+      </div>
+
+      <div class="form-row">
+        <label for="f-desc">Description (Optional)</label>
+        <textarea id="f-desc" rows="2" placeholder="Condition, horsepower, implements included (plough, rotavator), diesel inclusion..."></textarea>
+      </div>
+
+      <div class="form-row two-col">
+        <div>
+          <label for="f-owner">Owner Name</label>
+          <input type="text" id="f-owner" placeholder="e.g. Ramesh Reddy" required>
         </div>
+        <div>
+          <label for="f-phone">10-Digit Mobile / WhatsApp</label>
+          <input type="tel" id="f-phone" placeholder="e.g. 9848012345" pattern="[6-9][0-9]{9}" maxlength="10" required>
+        </div>
+      </div>
 
-        <button type="submit" class="btn btn-primary btn-wide">Publish Listing Live</button>
-        <p class="form-note" id="formNote" role="status"></p>
-      </form>
-    </div>
+      <button type="submit" class="btn btn-primary btn-wide">🚀 Publish Listing Live</button>
+      <p id="formNote" class="form-note"></p>
+    </form>
   </section>
 
 </main>
 
-<footer class="site-footer">
-  <div class="wrap footer-inner">
-    <div class="logo">
-      <svg width="24" height="24" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M4 20L10 8L14 16L18 6L24 20" stroke="#E8A93A" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-      </svg>
-      <span>Jai Kisan</span>
-    </div>
-    <p>Developed by Nidadavolu Murali Manohar for Indian farmers. Real-time Mandi feeds pulled via Agmarknet. Micro-weather powered by Open-Meteo. Direct 0% commission peer-to-peer equipment sharing.</p>
-  </div>
-</footer>
+<!-- MOBILE BOTTOM NAVIGATION (APP BAR) -->
+<nav class="bottom-nav">
+  <button class="b-nav-item active" data-view="view-market">
+    <span class="b-icon">🚜</span>
+    <span class="b-label">Market</span>
+  </button>
+  <button class="b-nav-item" data-view="view-mandi">
+    <span class="b-icon">📈</span>
+    <span class="b-label">Mandi</span>
+  </button>
+  <button class="b-nav-item" data-view="view-weather">
+    <span class="b-icon">🌦️</span>
+    <span class="b-label">Weather</span>
+  </button>
+  <button class="b-nav-item" data-view="view-schemes">
+    <span class="b-icon">📜</span>
+    <span class="b-label">Schemes</span>
+  </button>
+  <button class="b-nav-item" data-view="view-post">
+    <span class="b-icon">➕</span>
+    <span class="b-label">Post Ad</span>
+  </button>
+</nav>
 
-<!-- CONTACT PANEL (WITH DIRECT CALL & WHATSAPP) -->
+<!-- CONTACT PANEL (PHONE & WHATSAPP) -->
 <div class="contact-overlay" id="contactOverlay"></div>
-<div class="contact-panel" id="contactPanel" role="dialog" aria-modal="true" aria-labelledby="panelTitle">
+<div class="contact-panel" id="contactPanel">
   <button class="panel-close" id="panelClose" aria-label="Close">✕</button>
   <div id="panelBody"></div>
 </div>
-
-<!-- Apple-Style Install Button -->
-<button id="installBtn" class="apple-btn" style="display: none;">
-  <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-    <polyline points="7 10 12 15 17 10"></polyline>
-    <line x1="12" y1="15" x2="12" y2="3"></line>
-  </svg>
-  <span>Install App</span>
-</button>
 
 <script src="script.js"></script>
 </body>
